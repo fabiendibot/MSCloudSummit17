@@ -1,0 +1,13 @@
+
+
+kubectl run nginx --image nginx
+kubectl get pods
+kubectl expose deployment nginx --port=80
+
+
+kubectl edit svc/nginx
+# changer clusterIP en LoadBalancer
+
+
+kubectl proxy
+http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard

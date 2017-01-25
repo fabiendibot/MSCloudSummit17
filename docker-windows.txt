@@ -1,0 +1,9 @@
+#### Install Docker on Windows
+Enable-WindowsOptionalFeature -Online -FeatureName containers -All
+Invoke-WebRequest https://test.docker.com/builds/Windows/x86_64/docker-1.13.0-rc7.zip -OutFile "$env:TEMP\docker-1.13.0-rc7.zip" -UseBasicParsing
+
+Expand-Archive -Path "$env:TEMP\docker-1.13.0-rc7.zip" -DestinationPath $env:ProgramFiles
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Docker", [EnvironmentVariableTarget]::Machine)
+
+Dans un nouveau terminal
+dockerd.exe --register-service

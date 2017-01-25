@@ -1,0 +1,93 @@
+# Initialisation du Swarm
+docker swarm init
+
+# Joindre les manager
+docker swarm join-token manager
+
+# Joindre les workers
+docker swarm join-token worker
+
+# Voir les noeuds du cluster swarm
+docker node ls
+
+# On se log au repository
+docker login <dns> -u <user> -p <password>
+
+# créer un répertoire demo
+mkdir demo
+cd demo
+
+# vi docker-compose.yml  avec le contenu suivant
+# Construction d'une stack de service
+version: "3"
+services:
+  proxy:
+    image: mscloudsummit-microsoft.azurecr.io/myshop/proxy:1.0
+    ports: ["80:80"]
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=MYSHOP]
+
+  products:
+    image: mscloudsummit-microsoft.azurecr.io/myshop/products-api:20170110.1
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=MYSHOP]
+
+  ratings:
+    image: mscloudsummit-microsoft.azurecr.io/myshop/ratings-api:20170110.1
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=MYSHOP]
+
+  recommandations:
+    image: mscloudsummit-microsoft.azurecr.io/myshop/recommandations-api:20170110.1
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=MYSHOP]
+
+  shop:
+    image: mscloudsummit-microsoft.azurecr.io/myshop/front:20170110.1
+    environment:
+      - SHOP_PRODUCTS_API_URL=/products/
+      - SHOP_RATINGS_API_URL=/ratings/
+      - SHOP_RECOMMANDATIONS_API_URL=/recommandations/
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=MYSHOP]
+
+
+# Create the application stack
+docker stack deploy demo -c docker-compose.yml --with-registry-auth
+
+
+# Vérification des modifications
+docker service inspect --pretty demo_proxy
+
+# Look at the full demo stack
+docker stack ps demo
+
+# Voir le nombre de service démarrés et leurs réplicas
+docker service ls
+
+# ouverture du site pour la démo de scale
+
+# Scaler.
+docker service scale demo_products=10
+
+# Rolling update
+# définition du temps avant de shooter l'ancien container
+docker service inspect --pretty demo_ratings
+docker service update --update-delay 10s demo_ratings
+docker service inspect --pretty demo_ratings
+
+# Mise à jour du service
+docker service update --image mscloudsummit-microsoft.azurecr.io/myshop/ratings-api:20170110.2 demo_ratings
+
+# vérification que tout c'est bien passé :)
+docker service inspect --pretty demo_ratings

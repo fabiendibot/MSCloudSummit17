@@ -1,0 +1,22 @@
+##### OMS
+https://www.mms.microsoft.com
+
+## ajout modification dans 
+nano /lib/systemd/system/docker.service
+Environment="DOCKER_OPTS=--log-driver=fluentd --log-opt fluentd-address=localhost:25225"
+ExecStart=/usr/bin/docker daemon -H fd:// $DOCKER_OPTS
+
+## redémarrage docker
+systemctl restart docker && systemctl daemon-reload
+
+## lancement du conteneur OMS
+docker run --privileged -d -v /var/run/docker.sock:/var/run/docker.sock -e WSID="f24a6f84-e164-454e-8678-f6e92a88bc30" -e KEY="m7Q1jpOS8US4gXy11ISdemvfrRhMAOT+ibmpm8LZ12utgRmKw2GnvLZe7KsRHikTnZuXNN4CPuzwJCSOnC+uPw==" -h=`hostname` -p 127.0.0.1:25225:25225 --name="omsagent" --restart=always microsoft/oms
+
+
+## Weave
+
+curl -L git.io/scope -o /usr/local/bin/scope
+chmod a+x /usr/local/bin/scope
+scope launch --service-token=76z7nd8i1rhifwxcm3nxxuiqeymbe69t
+
+
